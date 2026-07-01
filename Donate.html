@@ -1,0 +1,344 @@
+
+Get responses tailored to you
+
+Log in to get answers based on saved chats, plus create images and upload files.
+
+
+Log in
+can you create a donation html and in bold title letters 
+DONATION 
+with { will be helpful } with a Blue B and rest of letters red 
+
+i would to Projects under donations in blue 
+with a colon for each projects title and once you click the project title you see the description of what is and how long i have been working on it 
+the website link 
+redirect to all monetizing transaction to stripe account 
+a meter with how much money was donated into the project 
+a donation button and when click a - 1 + appears and a confirm but the confirm doesn;t sjow unles you enter an amount or click the button up 
+on confirm i would like a apple pay option or a card adding featue to redirect to stripe 
+and after they pay show a meter that states sign in and complete the $50 to boost projects speed 
+
+
+Yes. Below is a complete HTML template that includes:
+
+DONATION title in bold
+
+"will be helpful" with a blue B and the remaining letters red
+
+Projects section in blue
+
+Expandable project titles (click to view description)
+
+Website link for each project
+
+Donation progress meter
+
+Donation amount selector (- / +)
+
+Confirm button hidden until an amount is selected
+
+Stripe checkout placeholder
+
+Post-payment message: "Sign in and complete the $50 boost to increase project speed"
+
+You'll need to connect the Stripe button to your actual Stripe account and Checkout Session.
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Donation Projects</title>
+
+<style>
+body{
+    font-family:Arial, sans-serif;
+    background:#f5f5f5;
+    margin:0;
+    padding:30px;
+}
+
+.container{
+    max-width:900px;
+    margin:auto;
+    background:white;
+    padding:30px;
+    border-radius:15px;
+    box-shadow:0 0 15px rgba(0,0,0,.1);
+}
+
+h1{
+    text-align:center;
+    font-size:48px;
+    font-weight:bold;
+    margin-bottom:10px;
+}
+
+.helpful{
+    text-align:center;
+    font-size:24px;
+    font-weight:bold;
+}
+
+.blue{
+    color:#0066ff;
+}
+
+.red{
+    color:#ff0000;
+}
+
+.projects-title{
+    color:#0066ff;
+    font-size:32px;
+    font-weight:bold;
+    margin-top:40px;
+}
+
+.project{
+    margin-top:15px;
+    border:1px solid #ddd;
+    border-radius:10px;
+    overflow:hidden;
+}
+
+.project-header{
+    background:#0066ff;
+    color:white;
+    padding:15px;
+    cursor:pointer;
+    font-weight:bold;
+}
+
+.project-content{
+    display:none;
+    padding:15px;
+    background:white;
+}
+
+.project-link{
+    display:inline-block;
+    margin-top:10px;
+    color:#0066ff;
+    text-decoration:none;
+}
+
+.progress-container{
+    margin-top:15px;
+}
+
+progress{
+    width:100%;
+    height:30px;
+}
+
+.amount-controls{
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    gap:15px;
+    margin-top:20px;
+}
+
+.amount-controls button{
+    width:40px;
+    height:40px;
+    font-size:20px;
+}
+
+.amount{
+    font-size:22px;
+    font-weight:bold;
+    min-width:80px;
+    text-align:center;
+}
+
+.confirm-btn{
+    display:none;
+    margin:20px auto;
+    padding:12px 25px;
+    background:#28a745;
+    color:white;
+    border:none;
+    border-radius:8px;
+    cursor:pointer;
+    font-size:18px;
+}
+
+.payment-options{
+    display:none;
+    text-align:center;
+    margin-top:20px;
+}
+
+.pay-btn{
+    background:black;
+    color:white;
+    border:none;
+    padding:12px 20px;
+    border-radius:8px;
+    cursor:pointer;
+    margin:5px;
+}
+
+.card-btn{
+    background:#0066ff;
+    color:white;
+    border:none;
+    padding:12px 20px;
+    border-radius:8px;
+    cursor:pointer;
+    margin:5px;
+}
+
+.boost-message{
+    display:none;
+    margin-top:20px;
+    text-align:center;
+    font-size:20px;
+    font-weight:bold;
+    color:#0066ff;
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+
+<h1>DONATION</h1>
+
+<div class="helpful">
+    <span>{ will be helpful }</span><br><br>
+    <span class="blue">B</span><span class="red">e Helpful</span>
+</div>
+
+<h2 class="projects-title">Projects</h2>
+
+<div class="project">
+    <div class="project-header" onclick="toggleProject(this)">
+        Project Alpha:
+    </div>
+
+    <div class="project-content">
+
+        <p>
+            Description:
+            This project focuses on developing new tools and features.
+        </p>
+
+        <p>
+            Working Time:
+            2 Years
+        </p>
+
+        <a href="https://yourwebsite.com"
+           target="_blank"
+           class="project-link">
+           Visit Website
+        </a>
+
+        <div class="progress-container">
+            <p>Donation Progress</p>
+            <progress value="3500" max="10000"></progress>
+            <p>$3,500 Raised of $10,000</p>
+        </div>
+
+        <div class="amount-controls">
+            <button onclick="decrease()">-</button>
+            <div class="amount" id="amount">$0</div>
+            <button onclick="increase()">+</button>
+        </div>
+
+        <button class="confirm-btn" id="confirmBtn" onclick="showPayments()">
+            Confirm Donation
+        </button>
+
+        <div class="payment-options" id="paymentOptions">
+            <h3>Choose Payment Method</h3>
+
+            <!-- Apple Pay via Stripe -->
+            <button class="pay-btn" onclick="stripeCheckout()">
+                Apple Pay
+            </button>
+
+            <!-- Card via Stripe -->
+            <button class="card-btn" onclick="stripeCheckout()">
+                Add Card
+            </button>
+        </div>
+
+        <div class="boost-message" id="boostMessage">
+            Sign in and complete the $50 boost to increase project speed.
+        </div>
+
+    </div>
+</div>
+
+</div>
+
+<script>
+
+let donationAmount = 0;
+
+function toggleProject(element){
+    const content = element.nextElementSibling;
+
+    content.style.display =
+        content.style.display === "block"
+        ? "none"
+        : "block";
+}
+
+function increase(){
+    donationAmount += 1;
+    updateAmount();
+}
+
+function decrease(){
+    if(donationAmount > 0){
+        donationAmount -= 1;
+    }
+    updateAmount();
+}
+
+function updateAmount(){
+
+    document.getElementById("amount").innerText =
+        "$" + donationAmount;
+
+    document.getElementById("confirmBtn").style.display =
+        donationAmount > 0
+        ? "block"
+        : "none";
+}
+
+function showPayments(){
+    document.getElementById("paymentOptions").style.display =
+        "block";
+}
+
+/*
+Replace with Stripe Checkout Session URL
+or Stripe Payment Link
+*/
+function stripeCheckout(){
+
+    // Example:
+    // window.location.href =
+    // "https://buy.stripe.com/YOUR_PAYMENT_LINK";
+
+    alert(
+      "Redirect this button to your Stripe Checkout Session."
+    );
+
+    setTimeout(() => {
+        document.getElementById("boostMessage").style.display =
+            "block";
+    }, 1000);
+}
+
+</script>
+
+</body>
+</html>
+
