@@ -2762,6 +2762,84 @@ img { max-width: 100%; }
   animation: pulse-text 1s ease-in-out infinite;
 }
 
+
+/* ============================================================
+   OVERLAP FIX — Responsive topbar + safety rules
+   Prevents topbar items (currency pills, buttons) from
+   overlapping when the window is narrower than ~1400px.
+   ============================================================ */
+
+/* Let the topbar wrap onto a second line instead of overlapping */
+#topbar {
+  flex-wrap: wrap;
+  height: auto;
+  min-height: var(--topbar-height);
+  padding: 10px var(--gap-lg);
+  row-gap: 8px;
+}
+
+/* Title takes its own space, everything else can wrap below it */
+.topbar-page-title {
+  flex-shrink: 0;
+}
+
+/* On narrower screens, hide the spacer so items wrap tightly
+   instead of being pushed apart with huge gaps */
+@media (max-width: 1100px) {
+  .topbar-spacer { flex-basis: 100%; height: 0; }
+}
+
+/* Shrink currency pills and hide labels on tight screens so
+   numbers stay readable instead of getting squeezed/overlapped */
+@media (max-width: 900px) {
+  .topbar-currency .currency-label { display: none; }
+  .topbar-currency { padding: 5px 10px; }
+}
+
+/* On small screens, collapse the Ko-fi button to icon-only
+   and shrink the Discord button so nothing overlaps */
+@media (max-width: 640px) {
+  #topbar a[href*="ko-fi"] span,
+  #topbar a[href*="ko-fi"] { 
+    padding: 6px 10px;
+  }
+  .topbar-btn { padding: 0 10px; font-size: 11px; }
+  .topbar-page-title { font-size: 15px; }
+}
+
+/* Safety net — never let any flex row's children overlap by
+   forcing them to respect their own content width as a minimum */
+#topbar > * { min-width: fit-content; }
+
+/* Exchange / Auction filter bar — ensure it never overlaps the
+   sidebar on medium screens by stacking earlier */
+@media (max-width: 1200px) {
+  .exchange-layout { grid-template-columns: 1fr; }
+  .exchange-sidebar { order: -1; }
+}
+
+/* Auction filter bar controls — shrink gracefully instead of
+   overlapping when space is tight */
+@media (max-width: 640px) {
+  .auction-filter-bar { gap: 6px; }
+  .auction-filter-bar .search-wrap { max-width: 100%; flex: 1 1 100%; }
+  .select-control { min-width: 100px; flex: 1; }
+}
+
+/* General safety: any grid/flex row of controls should wrap
+   rather than clip or overlap on narrow viewports */
+@media (max-width: 480px) {
+  .controls-bar, .auction-filter-bar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .controls-bar .search-wrap,
+  .auction-filter-bar .search-wrap {
+    max-width: 100%;
+  }
+  .select-control { width: 100%; }
+}
+
 </style>
 </head>
 
@@ -2848,6 +2926,11 @@ img { max-width: 100%; }
       </div>
 
       <button class="topbar-btn topbar-btn-ghost" id="topbar-notif-btn" title="Notifications">🔔</button>
+      <a href="https://ko-fi.com/lukaistudio" target="_blank" rel="noopener"
+         style="display:inline-flex;align-items:center;gap:6px;padding:6px 14px;background:linear-gradient(135deg,#ff5e5b,#ff8c42);color:#fff;border-radius:99px;font-size:12px;font-weight:700;text-decoration:none;letter-spacing:0.5px;transition:opacity 0.2s;"
+         onmouseover="this.style.opacity='0.85'" onmouseout="this.style.opacity='1'">
+        ☕ Support
+      </a>
       <button class="topbar-btn topbar-btn-primary" id="topbar-discord-btn">Connect Discord</button>
     </header>
 
