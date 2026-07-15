@@ -427,6 +427,16 @@ img { max-width: 100%; }
   animation: pageFadeIn var(--t-normal) ease;
 }
 
+/* Cap content width so wide/full-screen windows don't stretch stat rows,
+   grids, and panels into sparse, oddly-spaced layouts. Applied per direct
+   child rather than to .page itself, since .page uses inset:0 for its own
+   sizing/scroll behavior. */
+.page > * {
+  max-width: 1400px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
 @keyframes pageFadeIn {
   from { opacity: 0; transform: translateY(8px); }
   to   { opacity: 1; transform: translateY(0); }
@@ -2764,80 +2774,178 @@ img { max-width: 100%; }
 
 
 /* ============================================================
-   OVERLAP FIX — Responsive topbar + safety rules
-   Prevents topbar items (currency pills, buttons) from
-   overlapping when the window is narrower than ~1400px.
+   EXCHANGE PAGE — CLEAN REBUILD (v2)
+   Simple flexbox layout, no fragile grid/absolute positioning.
+   Fully self-contained, does not depend on any older exchange-* rules.
    ============================================================ */
 
-/* Let the topbar wrap onto a second line instead of overlapping */
-#topbar {
+.exchange-tabs-v2 {
+  display: flex;
   flex-wrap: wrap;
-  height: auto;
-  min-height: var(--topbar-height);
-  padding: 10px var(--gap-lg);
-  row-gap: 8px;
+  gap: 4px;
+  background: var(--clr-surface);
+  border: 1px solid var(--clr-border);
+  border-radius: 12px;
+  padding: 4px;
+  margin-bottom: 20px;
+  width: fit-content;
+  max-width: 100%;
+}
+.exchange-tab-v2 {
+  padding: 8px 18px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  color: var(--clr-text-muted);
+  background: transparent;
+  border: none;
+  white-space: nowrap;
+  transition: all 0.15s ease;
+}
+.exchange-tab-v2:hover { color: var(--clr-text-primary); }
+.exchange-tab-v2.active {
+  background: var(--clr-elevated);
+  color: var(--clr-rift);
 }
 
-/* Title takes its own space, everything else can wrap below it */
-.topbar-page-title {
-  flex-shrink: 0;
+.exchange-panel-v2 {
+  width: 100%;
 }
 
-/* On narrower screens, hide the spacer so items wrap tightly
-   instead of being pushed apart with huge gaps */
-@media (max-width: 1100px) {
-  .topbar-spacer { flex-basis: 100%; height: 0; }
+/* Main grid: content column + fixed sidebar. Uses flexbox instead
+   of CSS grid so there is zero risk of implicit track sizing bugs. */
+.exchange-grid-v2 {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  width: 100%;
+  align-items: flex-start;
 }
-
-/* Shrink currency pills and hide labels on tight screens so
-   numbers stay readable instead of getting squeezed/overlapped */
+.exchange-main-v2 {
+  flex: 1 1 500px;
+  min-width: 0;
+  max-width: 100%;
+}
+.exchange-side-v2 {
+  flex: 0 0 300px;
+  max-width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
 @media (max-width: 900px) {
-  .topbar-currency .currency-label { display: none; }
-  .topbar-currency { padding: 5px 10px; }
+  .exchange-side-v2 { flex: 1 1 100%; order: -1; }
+  .exchange-main-v2 { flex: 1 1 100%; }
 }
 
-/* On small screens, collapse the Ko-fi button to icon-only
-   and shrink the Discord button so nothing overlaps */
-@media (max-width: 640px) {
-  #topbar a[href*="ko-fi"] span,
-  #topbar a[href*="ko-fi"] { 
-    padding: 6px 10px;
-  }
-  .topbar-btn { padding: 0 10px; font-size: 11px; }
-  .topbar-page-title { font-size: 15px; }
+/* Filter bar — simple flex-wrap, generous min-widths so nothing
+   ever needs to overlap or get clipped */
+.exchange-filters-v2 {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  margin-bottom: 16px;
+  width: 100%;
+}
+.exchange-search-v2 {
+  position: relative;
+  flex: 1 1 220px;
+  min-width: 180px;
+  max-width: 320px;
+}
+.exchange-search-icon-v2 {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 14px;
+  color: var(--clr-text-muted);
+  pointer-events: none;
+}
+.exchange-search-input-v2 {
+  width: 100%;
+  height: 38px;
+  background: var(--clr-surface);
+  border: 1px solid var(--clr-border);
+  border-radius: 10px;
+  color: var(--clr-text-primary);
+  padding: 0 12px 0 36px;
+  font-size: 13px;
+  box-sizing: border-box;
+}
+.exchange-search-input-v2:focus { outline: none; border-color: var(--clr-rift); }
+
+.exchange-select-v2 {
+  height: 38px;
+  background: var(--clr-surface);
+  border: 1px solid var(--clr-border);
+  border-radius: 10px;
+  color: var(--clr-text-primary);
+  padding: 0 12px;
+  font-size: 12px;
+  cursor: pointer;
+  flex: 0 0 auto;
 }
 
-/* Safety net — never let any flex row's children overlap by
-   forcing them to respect their own content width as a minimum */
-#topbar > * { min-width: fit-content; }
+.exchange-view-toggle-v2 {
+  display: inline-flex;
+  border: 1px solid var(--clr-border);
+  border-radius: 10px;
+  overflow: hidden;
+  flex: 0 0 auto;
+}
+.exchange-view-toggle-v2 button {
+  background: var(--clr-surface);
+  border: none;
+  color: var(--clr-text-muted);
+  height: 36px;
+  width: 38px;
+  font-size: 15px;
+  cursor: pointer;
+}
+.exchange-view-toggle-v2 button + button { border-left: 1px solid var(--clr-border); }
+.exchange-view-toggle-v2 button.active { background: var(--clr-rift); color: var(--clr-void); }
 
-/* Exchange / Auction filter bar — ensure it never overlaps the
-   sidebar on medium screens by stacking earlier */
-@media (max-width: 1200px) {
-  .exchange-layout { grid-template-columns: 1fr; }
-  .exchange-sidebar { order: -1; }
+.exchange-list-btn-v2 {
+  height: 38px;
+  padding: 0 18px;
+  background: var(--clr-rift);
+  color: var(--clr-void);
+  border: none;
+  border-radius: 10px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+.exchange-list-btn-v2:hover { filter: brightness(1.1); }
+
+/* Sidebar panels */
+.exchange-panel-box-v2 {
+  background: var(--clr-surface);
+  border: 1px solid var(--clr-border);
+  border-radius: 12px;
+  padding: 16px;
+  width: 100%;
+  box-sizing: border-box;
+}
+.exchange-panel-title-v2 {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--clr-text-muted);
+  margin-bottom: 12px;
 }
 
-/* Auction filter bar controls — shrink gracefully instead of
-   overlapping when space is tight */
-@media (max-width: 640px) {
-  .auction-filter-bar { gap: 6px; }
-  .auction-filter-bar .search-wrap { max-width: 100%; flex: 1 1 100%; }
-  .select-control { min-width: 100px; flex: 1; }
-}
-
-/* General safety: any grid/flex row of controls should wrap
-   rather than clip or overlap on narrow viewports */
 @media (max-width: 480px) {
-  .controls-bar, .auction-filter-bar {
-    flex-direction: column;
-    align-items: stretch;
-  }
-  .controls-bar .search-wrap,
-  .auction-filter-bar .search-wrap {
-    max-width: 100%;
-  }
-  .select-control { width: 100%; }
+  .exchange-filters-v2 { flex-direction: column; align-items: stretch; }
+  .exchange-search-v2 { max-width: 100%; }
+  .exchange-select-v2 { width: 100%; }
 }
 
 </style>
@@ -3020,6 +3128,12 @@ img { max-width: 100%; }
           <div class="progress-wrap">
             <div class="progress-fill" id="coll-progress-fill" style="width:0%;background:var(--clr-rift);transition:width 0.6s ease;"></div>
           </div>
+        </div>
+
+        <!-- MINE inventory sync — resources/tools from the Godot game, not
+             part of the rarity-tiered card system, so kept as its own panel. -->
+        <div id="mine-inventory-panel" style="margin-bottom:20px;">
+          <!-- rendered by JS: renderMineInventory() -->
         </div>
 
         <!-- Card grid -->
@@ -3248,23 +3362,26 @@ img { max-width: 100%; }
           </div>
         </div>
 
-        <!-- Resources row — sand, rocks, seashells -->
-        <div class="stat-grid" style="margin-bottom:var(--gap-md); grid-template-columns: repeat(auto-fit, minmax(120px,1fr));">
-          <div class="stat-card" style="--accent:#e8c07a">
-            <div class="stat-card-value" id="profile-stat-sand" style="font-size:20px;">0</div>
-            <div class="stat-card-label">🏖️ Sand</div>
+        <!-- Inventory summary — links over to the full MINE Inventory panel on Collection -->
+        <div class="panel" style="margin-bottom:var(--gap-md); padding:12px 14px; display:flex; align-items:center; justify-content:space-between; gap:12px; cursor:pointer;"
+             onclick="Nav.goTo('collection')" role="button" tabindex="0" onkeydown="if(event.key==='Enter')Nav.goTo('collection')">
+          <div style="display:flex; align-items:center; gap:12px; min-width:0;">
+            <div style="font-size:20px;">⛏️</div>
+            <div style="min-width:0;">
+              <div style="font-weight:700; font-size:13px;">Inventory</div>
+              <div style="font-family:var(--font-mono); font-size:11px; color:var(--clr-text-secondary); margin-top:2px;" id="profile-inventory-summary">Not linked yet</div>
+            </div>
           </div>
-          <div class="stat-card" style="--accent:#a0a8b8">
-            <div class="stat-card-value" id="profile-stat-rocks" style="font-size:20px;">0</div>
-            <div class="stat-card-label">🪨 Rocks</div>
+          <div style="font-family:var(--font-mono); font-size:10px; color:var(--clr-rift); white-space:nowrap; border:1px solid var(--clr-border-hi); padding:5px 9px; border-radius:6px;">View →</div>
+        </div>
+
+        <!-- Favorite cards — shown directly under Inventory -->
+        <div class="panel" style="margin-bottom:var(--gap-md);">
+          <div class="section-header" style="margin-bottom:var(--gap-md)">
+            <h2 class="section-title">Favorite Cards</h2>
           </div>
-          <div class="stat-card" style="--accent:#f0a0c0">
-            <div class="stat-card-value" id="profile-stat-seashells" style="font-size:20px;">0</div>
-            <div class="stat-card-label">🐚 Seashells</div>
-          </div>
-          <div class="stat-card" style="--accent:var(--clr-rift)">
-            <div class="stat-card-value" id="profile-stat-carddeck" style="font-size:20px;">0</div>
-            <div class="stat-card-label">🃏 Card Deck</div>
+          <div class="card-grid" id="profile-fav-cards" style="grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));">
+            <!-- Rendered dynamically -->
           </div>
         </div>
 
@@ -3303,16 +3420,6 @@ img { max-width: 100%; }
             </div>
             <div id="profile-collection-progress">
               <!-- Rendered dynamically per universe/rarity -->
-            </div>
-          </div>
-
-          <!-- Favorite cards -->
-          <div class="panel">
-            <div class="section-header" style="margin-bottom:var(--gap-md)">
-              <h2 class="section-title">Favorite Cards</h2>
-            </div>
-            <div class="card-grid" id="profile-fav-cards" style="grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));">
-              <!-- Rendered dynamically -->
             </div>
           </div>
         </div>
@@ -3548,32 +3655,31 @@ img { max-width: 100%; }
         </div><!-- /settings-layout -->
       </section>
 
-    </div><!-- /pages-container -->
-  </div><!-- /main-area -->
-</div><!-- /app -->
-
       <!-- ============ PAGE: EXCHANGE (AUCTION HOUSE + TRADES) ============ -->
       <section id="page-exchange" class="page">
 
         <!-- Sub-page tabs -->
-        <div class="exchange-tabs">
-          <button class="exchange-tab active" data-exchange-tab="auction" onclick="switchExchangeTab('auction', this)">🏛️ Auction House</button>
-          <button class="exchange-tab" data-exchange-tab="trades" onclick="switchExchangeTab('trades', this)">🤝 Trades</button>
-          <button class="exchange-tab" data-exchange-tab="mylistings" onclick="switchExchangeTab('mylistings', this)">📋 My Listings</button>
+        <div class="exchange-tabs-v2">
+          <button class="exchange-tab-v2 active" data-exchange-tab="auction" onclick="switchExchangeTab('auction', this)">🏛️ Auction House</button>
+          <button class="exchange-tab-v2" data-exchange-tab="trades" onclick="switchExchangeTab('trades', this)">🤝 Trades</button>
+          <button class="exchange-tab-v2" data-exchange-tab="mylistings" onclick="switchExchangeTab('mylistings', this)">📋 My Listings</button>
         </div>
 
         <!-- ───── AUCTION HOUSE ───── -->
-        <div id="exchange-panel-auction" class="exchange-panel">
-          <div class="exchange-layout">
-            <!-- Main list -->
-            <div>
+        <div id="exchange-panel-auction" class="exchange-panel-v2">
+
+          <div class="exchange-grid-v2">
+
+            <!-- Main column -->
+            <div class="exchange-main-v2">
+
               <!-- Filter bar -->
-              <div class="auction-filter-bar">
-                <div class="search-wrap" style="max-width:260px">
-                  <span class="search-icon">🔍</span>
-                  <input type="text" class="search-input" id="auction-search" placeholder="Search listings…" oninput="filterAuctions()" />
+              <div class="exchange-filters-v2">
+                <div class="exchange-search-v2">
+                  <span class="exchange-search-icon-v2">🔍</span>
+                  <input type="text" class="exchange-search-input-v2" id="auction-search" placeholder="Search listings…" oninput="filterAuctions()" />
                 </div>
-                <select class="select-control" id="auction-filter-rarity" onchange="filterAuctions()">
+                <select class="exchange-select-v2" id="auction-filter-rarity" onchange="filterAuctions()">
                   <option value="">All Rarities</option>
                   <option value="base">Base</option>
                   <option value="uncommon">Uncommon</option>
@@ -3582,17 +3688,17 @@ img { max-width: 100%; }
                   <option value="legendary">Legendary</option>
                   <option value="mythic">Mythic</option>
                 </select>
-                <select class="select-control" id="auction-filter-sort" onchange="filterAuctions()">
+                <select class="exchange-select-v2" id="auction-filter-sort" onchange="filterAuctions()">
                   <option value="ending-asc">Ending Soonest</option>
                   <option value="price-asc">Lowest Price</option>
                   <option value="price-desc">Highest Price</option>
                   <option value="bids-desc">Most Bids</option>
                 </select>
-                <div class="auction-view-toggle">
+                <div class="exchange-view-toggle-v2">
                   <button data-view="list" class="active" onclick="setAuctionView('list')" title="List view" aria-label="List view">☰</button>
                   <button data-view="gallery" onclick="setAuctionView('gallery')" title="Card view" aria-label="Card view">▦</button>
                 </div>
-                <button class="btn btn-primary btn-sm" onclick="openListCardModal()">＋ List a Card</button>
+                <button class="exchange-list-btn-v2" onclick="openListCardModal()">＋ List a Card</button>
               </div>
 
               <!-- Column headers -->
@@ -3610,11 +3716,11 @@ img { max-width: 100%; }
               <div class="pagination" id="auction-pagination"></div>
             </div>
 
-            <!-- Sidebar -->
-            <aside class="exchange-sidebar">
-              <!-- My Balance -->
-              <div class="exchange-sidebar-panel">
-                <div class="exchange-sidebar-title">Your Balance</div>
+            <!-- Sidebar column -->
+            <div class="exchange-side-v2">
+
+              <div class="exchange-panel-box-v2">
+                <div class="exchange-panel-title-v2">Your Balance</div>
                 <div class="stat-mini-row">
                   <span class="stat-mini-label">💰 Coins</span>
                   <span class="stat-mini-val" id="exchange-balance">0</span>
@@ -3633,9 +3739,8 @@ img { max-width: 100%; }
                 </div>
               </div>
 
-              <!-- Watchlist -->
-              <div class="exchange-sidebar-panel">
-                <div class="exchange-sidebar-title">👁 Watchlist</div>
+              <div class="exchange-panel-box-v2">
+                <div class="exchange-panel-title-v2">👁 Watchlist</div>
                 <div id="exchange-watchlist">
                   <div style="font-size:12px;color:var(--clr-text-muted);text-align:center;padding:16px 0;">
                     Bid on a listing to watch it
@@ -3643,68 +3748,42 @@ img { max-width: 100%; }
                 </div>
               </div>
 
-              <!-- Recent Sales -->
-              <div class="exchange-sidebar-panel">
-                <div class="exchange-sidebar-title">📈 Recent Sales</div>
+              <div class="exchange-panel-box-v2">
+                <div class="exchange-panel-title-v2">📈 Recent Sales</div>
                 <div id="exchange-recent-sales">
-                  <!-- Rendered dynamically -->
+                  <div style="font-size:12px;color:var(--clr-text-muted);text-align:center;padding:16px 0;">
+                    No sales yet
+                  </div>
                 </div>
               </div>
-            </aside>
+
+            </div>
+
           </div>
         </div>
 
         <!-- ───── TRADES ───── -->
-        <div id="exchange-panel-trades" class="exchange-panel" style="display:none">
-          <div style="display:flex;gap:var(--gap-md);margin-bottom:var(--gap-lg);align-items:flex-start;flex-wrap:wrap">
-            <div style="flex:1;min-width:200px">
-              <div class="section-title" style="margin-bottom:var(--gap-sm)">Create a Trade Offer</div>
-              <div style="font-size:12px;color:var(--clr-text-muted);line-height:1.6">
-                Select cards from your collection to offer, then pick cards you want in return.
-                You can sweeten the deal with bonus coins.
-              </div>
-            </div>
-            <button class="btn btn-primary" onclick="openNewTradeModal()">🤝 New Trade Offer</button>
-          </div>
-
-          <!-- Incoming/Outgoing trade tabs -->
-          <div class="category-tabs" style="margin-bottom:var(--gap-md)">
-            <button class="category-tab active" id="trade-tab-incoming" onclick="showTradeTab('incoming',this)">
-              📥 Incoming <span id="trade-incoming-count" style="margin-left:4px;background:var(--clr-nova);color:#fff;font-size:9px;padding:1px 6px;border-radius:99px;">0</span>
-            </button>
-            <button class="category-tab" id="trade-tab-outgoing" onclick="showTradeTab('outgoing',this)">📤 Outgoing</button>
-            <button class="category-tab" id="trade-tab-history" onclick="showTradeTab('history',this)">📜 History</button>
-          </div>
-
-          <div id="trade-list-incoming" class="trade-panel-list">
+        <div id="exchange-panel-trades" class="exchange-panel-v2" style="display:none;">
+          <div class="auction-list" id="trades-list">
             <!-- Rendered by renderTrades() -->
           </div>
-          <div id="trade-list-outgoing" class="trade-panel-list" style="display:none"></div>
-          <div id="trade-list-history" class="trade-panel-list" style="display:none"></div>
         </div>
 
         <!-- ───── MY LISTINGS ───── -->
-        <div id="exchange-panel-mylistings" class="exchange-panel" style="display:none">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:var(--gap-lg);flex-wrap:wrap;gap:var(--gap-sm)">
-            <div>
-              <div class="section-title">My Active Listings</div>
-              <div style="font-size:12px;color:var(--clr-text-muted);margin-top:4px">
-                Listing fee: 5% of final sale price (deducted on completion).
-              </div>
-            </div>
-            <div style="display:flex;gap:var(--gap-sm);align-items:center">
-              <div class="auction-view-toggle">
-                <button data-view="list" class="active" onclick="setAuctionView('list')" title="List view" aria-label="List view">☰</button>
-                <button data-view="gallery" onclick="setAuctionView('gallery')" title="Card view" aria-label="Card view">▦</button>
-              </div>
-              <button class="btn btn-primary" onclick="openListCardModal()">＋ List a Card</button>
-            </div>
+        <div id="exchange-panel-mylistings" class="exchange-panel-v2" style="display:none;">
+          <div class="exchange-filters-v2">
+            <button class="exchange-list-btn-v2" onclick="openListCardModal()">＋ List a Card</button>
+          </div>
           <div class="auction-list" id="my-listings-list">
             <!-- Rendered by renderMyListings() -->
           </div>
         </div>
 
       </section>
+
+    </div><!-- /pages-container -->
+  </div><!-- /main-area -->
+</div><!-- /app -->
 
 <!-- ====================== MODAL ====================== -->
 <div id="modal-backdrop" role="dialog" aria-modal="true" aria-hidden="true">
@@ -3801,14 +3880,14 @@ const AppState = {
    * {
    *   id: string, name: string, description: string,
    *   icon: string, category: string, price: number,
-   *   currency: 'crystals'|'shards', odds: object
+   *   currency: 'coins'|'shakti', odds: object
    * }
    *
    * marketItems: Item[]
    * {
    *   id: string, name: string, description: string,
    *   icon: string, type: string, price: number,
-   *   currency: 'crystals'|'shards'
+   *   currency: 'coins'|'shakti'
    * }
    */
   packs: [],       // ← Populate from API
@@ -4509,6 +4588,73 @@ function renderCollectionPage() {
   renderCollectionStats();
   populateUniverseFilter();
   renderCollectionGrid();
+  renderMineInventory();
+}
+
+/* ============================================================
+   MINE INVENTORY — resources/tools synced from the Godot game.
+   Not part of the rarity-tiered card system; MINE calls
+   POST /api/mine/sync (on save) once a player links their Discord
+   ID in MINE's Settings menu.
+   ============================================================ */
+const MINE_RESOURCE_ICONS = { Sand: '🏖️', Shell: '🐚', Stone: '🪨', Wood: '🪵', Vine: '🌿', Gem: '💎' };
+const MINE_TOOL_ICONS = { Shovel: '⛏️', Sword: '🗡️', 'Fishing Rod': '🎣' };
+
+function renderMineInventory() {
+  const el = document.getElementById('mine-inventory-panel');
+  if (!el) return;
+
+  if (!AppState.user.mineLinked) {
+    el.innerHTML = `
+      <div class="panel" style="padding:16px;">
+        <div style="font-weight:700;margin-bottom:4px;">⛏️ MINE Inventory</div>
+        <div style="font-size:12px;color:var(--clr-text-muted);">
+          Not linked yet. Copy your Account ID from
+          <a href="#" onclick="Nav.goTo('settings');return false;" style="color:var(--clr-rift)">Settings</a>
+          here, then paste it into MINE's Settings → Link Account menu to sync
+          your resources and tools into this collection.
+        </div>
+      </div>`;
+    return;
+  }
+
+  const resources = AppState.user.mineResources || {};
+  const tools = AppState.user.mineTools || [];
+
+  const resourceTiles = Object.entries(resources)
+    .filter(([, count]) => count > 0)
+    .map(([name, count]) => `
+      <div class="item-list-entry" style="padding:8px;">
+        <div class="item-entry-icon">${MINE_RESOURCE_ICONS[name] || '📦'}</div>
+        <div class="item-entry-info">
+          <div class="item-entry-name">${escHtml(name)}</div>
+          <div class="item-entry-type">From MINE</div>
+        </div>
+        <div class="item-entry-price">x${fmtNum(count)}</div>
+      </div>`).join('');
+
+  const toolTiles = tools.map(name => `
+    <div class="item-list-entry" style="padding:8px;">
+      <div class="item-entry-icon">${MINE_TOOL_ICONS[name] || '🛠️'}</div>
+      <div class="item-entry-info">
+        <div class="item-entry-name">${escHtml(name)}</div>
+        <div class="item-entry-type">Crafted tool · From MINE</div>
+      </div>
+    </div>`).join('');
+
+  const body = (resourceTiles + toolTiles) ||
+    `<div style="font-size:12px;color:var(--clr-text-muted);padding:8px;">Synced, but no resources or tools yet — go gather some in MINE!</div>`;
+
+  const syncedLabel = AppState.user.mineSyncedAt
+    ? `· last synced ${new Date(AppState.user.mineSyncedAt).toLocaleString()}` : '';
+
+  el.innerHTML = `
+    <div class="panel" style="padding:16px;">
+      <div style="font-weight:700;margin-bottom:8px;">⛏️ MINE Inventory
+        <span style="font-size:11px;font-weight:400;color:var(--clr-text-muted);">${syncedLabel}</span>
+      </div>
+      ${body}
+    </div>`;
 }
 
 function clearCollectionFilters() {
@@ -4627,7 +4773,7 @@ function renderMarketPacks() {
         <div class="pack-name">${escHtml(pack.name)}</div>
         <div class="pack-desc">${escHtml(pack.description || '')}</div>
         <div class="pack-footer">
-          <div class="pack-price">${pack.currency === 'shards' ? '⚡' : '💎'} ${fmtNum(pack.price || 0)}</div>
+          <div class="pack-price">${currencyMeta(pack.currency).icon} ${fmtNum(pack.price || 0)}</div>
           <button class="pack-buy-btn" onclick="event.stopPropagation(); openPurchaseModal('pack','${escHtml(pack.id)}')">Buy</button>
         </div>
       </div>
@@ -4665,7 +4811,7 @@ function renderMarketItems() {
         <div class="item-entry-name">${escHtml(item.name)}</div>
         <div class="item-entry-type">${escHtml(item.type || '')}</div>
       </div>
-      <div class="item-entry-price">${item.currency === 'shards' ? '⚡' : '💎'} ${fmtNum(item.price || 0)}</div>
+      <div class="item-entry-price">${currencyMeta(item.currency).icon} ${fmtNum(item.price || 0)}</div>
     </div>`).join('') + `</div>`;
 }
 
@@ -4721,14 +4867,23 @@ function updateCurrencyDisplays() {
   if (mktShards)   mktShards.textContent   = fmtNum(u.shakti  || 0);  // Shakti → market-shards (⚡)
 }
 
+/** Maps a shop currency key to the real, live currency it spends:
+ *  'shakti' → Shakti (⚡, AppState.user.shakti), anything else → Coins (💰, AppState.user.balance). */
+function currencyMeta(currency) {
+  return currency === 'shakti'
+    ? { field: 'shakti',  icon: '⚡', label: 'SHAKTI' }
+    : { field: 'balance', icon: '💰', label: 'COINS' };
+}
+
 /** Open purchase confirmation modal */
 function openPurchaseModal(type, itemId) {
   const source = type === 'pack' ? AppState.packs : AppState.marketItems;
   const item   = source.find(i => i.id === itemId);
   if (!item) return;
 
-  const balance    = item.currency === 'shards' ? AppState.user.shards : AppState.user.crystals;
-  const currIcon   = item.currency === 'shards' ? '⚡' : '💎';
+  const cur        = currencyMeta(item.currency);
+  const balance    = AppState.user[cur.field] || 0;
+  const currIcon   = cur.icon;
   const canAfford  = balance >= (item.price || 0);
 
   Modal.open({
@@ -4755,32 +4910,96 @@ function openPurchaseModal(type, itemId) {
   });
 }
 
-/**
- * Execute a purchase.
- * Wire this to your API endpoint: POST /api/shop/purchase
- */
+/** Execute a purchase. Packs call the real backend (POST /api/shop/purchase);
+ *  marketItems (upgrades/cosmetics) aren't backed by the API yet. */
 function executePurchase(type, itemId) {
-  const source = type === 'pack' ? AppState.packs : AppState.marketItems;
-  const item   = source.find(i => i.id === itemId);
+  if (type === 'pack') return executePackPurchase(itemId);
+
+  const item = AppState.marketItems.find(i => i.id === itemId);
   if (!item) return;
 
-  const bal = item.currency === 'shards' ? 'shards' : 'crystals';
+  const bal = currencyMeta(item.currency).field;
   if ((AppState.user[bal] || 0) < (item.price || 0)) {
     Toast.show('Insufficient Funds', 'You do not have enough to buy this.', 'error');
     return;
   }
 
-  // Deduct locally — replace with API call result in production
+  // Deduct locally — replace with API call result once /api/shop items exist
   AppState.user[bal] -= item.price || 0;
-  if (type === 'pack') AppState.user.packsOpened = (AppState.user.packsOpened || 0) + 1;
-
   AppState.recentPurchases.unshift({ id: item.id, name: item.name, icon: item.icon, date: new Date().toISOString() });
-
   updateCurrencyDisplays();
   Modal.close();
   Toast.show('Purchase Complete', item.name, 'success');
+}
 
-  // TODO: call API → POST /api/shop/purchase → handle card drops, item delivery, etc.
+async function executePackPurchase(packId) {
+  const pack = AppState.packs.find(p => p.id === packId);
+  if (!pack) return;
+  if (!AppState.user.id) {
+    Toast.show('Not Connected', 'Connect Discord to open packs.', 'error');
+    return;
+  }
+
+  Modal.close();
+  Toast.show('Opening pack...', pack.name, 'info');
+
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/shop/purchase`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ userId: AppState.user.id, packId }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`);
+
+    applyMongoUserData(data.user);
+    AppState.recentPurchases.unshift({ id: pack.id, name: pack.name, icon: pack.icon, date: new Date().toISOString() });
+    renderMarketplacePage();
+    showPackRevealModal(pack, data.rewards);
+  } catch (err) {
+    console.error('[MVCC] Pack purchase failed:', err);
+    Toast.show('Purchase Failed', err.message, 'error');
+  }
+}
+
+/** Reveal modal for what a pack actually gave the player. Numbered-edition
+ *  card pulls get called out — that's meant to be the hyped moment. */
+function showPackRevealModal(pack, rewards) {
+  const rows = (rewards || []).map(r => {
+    if (r.type === 'card' && !r.error) {
+      const numbered = r.issueNumber
+        ? `<div style="color:var(--clr-chrono);font-weight:700;font-size:13px;margin-top:4px;">✨ NUMBERED EDITION — Issue #${r.issueNumber}/20 ✨</div>`
+        : '';
+      return `
+        <div class="purchase-preview" style="border:1px solid var(--clr-border);border-radius:var(--radius-md);padding:10px;margin-bottom:8px;">
+          <div class="purchase-art">🃏</div>
+          <div>
+            <div class="purchase-detail-name">${escHtml(r.name)}</div>
+            <div class="purchase-detail-desc">${escHtml(r.universe)} · ${escHtml(r.tier)}</div>
+            ${numbered}
+          </div>
+        </div>`;
+    }
+    if (r.type === 'item' && !r.error) {
+      return `
+        <div class="purchase-preview" style="border:1px solid var(--clr-border);border-radius:var(--radius-md);padding:10px;margin-bottom:8px;">
+          <div class="purchase-art">${escHtml(r.icon || '📦')}</div>
+          <div>
+            <div class="purchase-detail-name">${escHtml(r.name)}</div>
+            <div class="purchase-detail-desc">${escHtml(r.description || '')}</div>
+          </div>
+        </div>`;
+    }
+    return `<div style="color:var(--clr-nova);font-size:12px;">⚠️ ${escHtml(r.error || 'Unknown reward')}</div>`;
+  }).join('');
+
+  Modal.open({
+    title: `${pack.name} opened!`,
+    subtitle: 'Here\'s what you got',
+    size: 'sm',
+    html: rows,
+    footer: `<button class="btn btn-primary" onclick="Modal.close()">Nice!</button>`,
+  });
 }
 
 /** Full marketplace page render */
@@ -5235,8 +5454,8 @@ function loadPersistedBattleStats() {
 
 const GYM_LEADERS = [
   {
-    id: 'brock',
-    name: 'Brock',
+    id: 'greg',
+    name: 'Greg',
     title: 'Rock-Solid Leader',
     icon: '⛰️',
     badge: '🪨 Boulder Badge',
@@ -5250,8 +5469,8 @@ const GYM_LEADERS = [
     ],
   },
   {
-    id: 'misty',
-    name: 'Misty',
+    id: 'dana',
+    name: 'Dana',
     title: 'The Tomboyish Mermaid',
     icon: '💧',
     badge: '💧 Cascade Badge',
@@ -5265,8 +5484,8 @@ const GYM_LEADERS = [
     ],
   },
   {
-    id: 'lt_surge',
-    name: 'Lt. Surge',
+    id: 'marcus',
+    name: 'Marcus',
     title: 'The Lightning American',
     icon: '⚡',
     badge: '⚡ Thunder Badge',
@@ -5280,8 +5499,8 @@ const GYM_LEADERS = [
     ],
   },
   {
-    id: 'erika',
-    name: 'Erika',
+    id: 'priya',
+    name: 'Priya',
     title: 'Nature-Loving Princess',
     icon: '🌸',
     badge: '🌿 Rainbow Badge',
@@ -5295,8 +5514,8 @@ const GYM_LEADERS = [
     ],
   },
   {
-    id: 'koga',
-    name: 'Koga',
+    id: 'owen',
+    name: 'Owen',
     title: 'Master of Poison',
     icon: '🥷',
     badge: '☠️ Soul Badge',
@@ -5310,8 +5529,8 @@ const GYM_LEADERS = [
     ],
   },
   {
-    id: 'sabrina',
-    name: 'Sabrina',
+    id: 'felicia',
+    name: 'Felicia',
     title: 'The Master of Psychic',
     icon: '🔮',
     badge: '🔮 Marsh Badge',
@@ -5325,8 +5544,8 @@ const GYM_LEADERS = [
     ],
   },
   {
-    id: 'blaine',
-    name: 'Blaine',
+    id: 'victor',
+    name: 'Victor',
     title: 'The Riddle-Loving Hothead',
     icon: '🔥',
     badge: '🌋 Volcano Badge',
@@ -5340,8 +5559,8 @@ const GYM_LEADERS = [
     ],
   },
   {
-    id: 'giovanni',
-    name: 'Giovanni',
+    id: 'naomi',
+    name: 'Naomi',
     title: 'The Last Gym Leader',
     icon: '😈',
     badge: '🌍 Earth Badge',
@@ -6037,11 +6256,17 @@ function renderProfilePage() {
   setEl('profile-stat-shakti',   fmtNum(u.shakti  || 0));
   setEl('profile-stat-balance',  fmtNum(u.balance || 0));
 
-  // --- Resource cards (Sand, Rocks, Seashells, Card Deck) ---
-  setEl('profile-stat-sand',      fmtNum(u.sand      || 0));
-  setEl('profile-stat-rocks',     fmtNum(u.rocks     || 0));
-  setEl('profile-stat-seashells', fmtNum(u.seashells || 0));
-  setEl('profile-stat-carddeck',  fmtNum(AppState.inventory.length || (u.cardDeck || []).length));
+  // --- Inventory summary tile (links to the full MINE Inventory panel on Collection) ---
+  const invSummaryEl = document.getElementById('profile-inventory-summary');
+  if (invSummaryEl) {
+    if (!u.mineLinked) {
+      invSummaryEl.textContent = 'Not linked yet';
+    } else {
+      const resourceTypes = Object.values(u.mineResources || {}).filter(n => n > 0).length;
+      const toolCount = (u.mineTools || []).length;
+      invSummaryEl.textContent = `${resourceTypes} resource type${resourceTypes === 1 ? '' : 's'} · ${toolCount} tool${toolCount === 1 ? '' : 's'}`;
+    }
+  }
 
   // --- Sidebar sync ---
   setEl('sidebar-username', u.username || 'Not Connected');
@@ -6274,9 +6499,11 @@ document.addEventListener('DOMContentLoaded', () => {
 function connectDiscord() {
   if (AppState.user.id) {
     // Disconnect
-    AppState.user = { id: null, username: null, discriminator: null, avatar: null, crystals: 0, shards: 0, packsOpened: 0 };
+    AppState.user = { id: null, username: null, discriminator: null, avatar: null, balance: 0, shakti: 0, packsOpened: 0 };
+    AppState.inventory = [];
     localStorage.removeItem('discord_user');
     updateCurrencyDisplays();
+    renderCollectionPage();
     renderProfilePage();
     renderSettingsPage();
     document.getElementById('topbar-discord-btn').textContent = 'Connect Discord';
@@ -6354,7 +6581,13 @@ function onDiscordAuthSuccess(discordUser) {
    For production: 'https://your-api.com'
    ============================================================ */
 
-const API_BASE_URL = 'https://economy-bot-production-3caf.up.railway.app'; // ← update to your deployed server URL if hosted
+// Auto-detects local testing vs. production so you don't have to hand-edit
+// this every time: when this page itself is served from 127.0.0.1/localhost
+// (e.g. via Live Server), it talks to your local backend on :3000. Otherwise
+// it talks to the deployed Railway server.
+const API_BASE_URL = /^(127\.0\.0\.1|localhost)$/.test(window.location.hostname)
+  ? 'http://localhost:3000'
+  : 'https://economy-bot-production-3caf.up.railway.app';
 
 /**
  * Fetch user data from MongoDB using their Discord ID.
@@ -6471,7 +6704,7 @@ function formatCardName(fileName) {
 }
 
 /** Derive a starting stat for cards that don't have one stored in MongoDB.
- *  Base cards start at 12/10 — enough to compete at Brock but not trivial.
+ *  Base cards start at 12/10 — enough to compete at Greg but not trivial.
  *  Higher rarities get a bigger floor so they feel premium immediately.
  */
 function deriveBaseStat(rarity, statType) {
@@ -6504,6 +6737,12 @@ function applyMongoUserData(doc) {
   AppState.user.cardDeck  = doc.cardDeck  || [];
   AppState.user.createdAt = doc.createdAt || null;
   AppState.user.updatedAt = doc.updatedAt || null;
+
+  // MINE (Godot game) sync fields
+  AppState.user.mineLinked     = doc.mineLinked    || false;
+  AppState.user.mineResources  = doc.mineResources || {};
+  AppState.user.mineTools      = doc.mineTools     || [];
+  AppState.user.mineSyncedAt   = doc.mineSyncedAt  || null;
 
   // Map cardDeck from MongoDB schema into UI card shape.
   // We try every plausible field name for series/universe so base cards
@@ -6608,12 +6847,19 @@ async function fetchInventory() {
   // renderCollectionPage();
 }
 
-/** Fetch marketplace data */
+/** Fetch marketplace data — packs are live; marketItems (upgrades/cosmetics)
+ *  aren't implemented on the backend yet, so that stays empty for now. */
 async function fetchMarketplace() {
-  // TODO: const res = await fetch(`${API_BASE_URL}/api/shop`);
-  // const data = await res.json();
-  // AppState.packs = data.packs;
-  // AppState.marketItems = data.items;
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/shop`, { mode: 'cors' });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    AppState.packs = (data.packs || []).map(p => ({ ...p, category: p.universe }));
+    AppState.marketCategories = ['All', ...new Set(AppState.packs.map(p => p.category).filter(Boolean))];
+    renderMarketplacePage();
+  } catch (err) {
+    console.warn('[MVCC] fetchMarketplace failed:', err.message);
+  }
 }
 
 /** Fetch battle history */
@@ -6696,28 +6942,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // API bootstrap — replace stubs with real calls
   // fetchInventory();
-  // fetchMarketplace();
+  fetchMarketplace(); // packs are viewable without logging in; buying still requires Discord
   // fetchBattleHistory();
   // fetchProfile();
-
-  // ── Demo seed cards ──────────────────────────────────────────────────────
-  // Pre-populate inventory with sample cards so the battle section, team
-  // builder, and character-select modal work without a live backend.
-  // Remove this block (or let applyMongoUserData overwrite it) once the API
-  // is wired up and returning real cardDeck data.
-  if (AppState.inventory.length === 0) {
-    const _demo = [
-      { id:'demo-1', name:'Shadow Striker',  rarity:'rare',      universe:'Void Realm',   attack:23, defense:18, level:3, xp:60,  xpMax:100, image:null, favorite:false, obtainedDate: new Date().toISOString() },
-      { id:'demo-2', name:'Neon Phoenix',    rarity:'epic',      universe:'Nova Corps',   attack:31, defense:25, level:5, xp:80,  xpMax:150, image:null, favorite:true,  obtainedDate: new Date().toISOString() },
-      { id:'demo-3', name:'Iron Warden',     rarity:'uncommon',  universe:'Steel Citadel',attack:18, defense:22, level:2, xp:30,  xpMax:100, image:null, favorite:false, obtainedDate: new Date().toISOString() },
-      { id:'demo-4', name:'Chrono Sage',     rarity:'legendary', universe:'Chrono Guild', attack:42, defense:34, level:7, xp:120, xpMax:200, image:null, favorite:true,  obtainedDate: new Date().toISOString() },
-      { id:'demo-5', name:'Rift Runner',     rarity:'base',      universe:'Void Realm',   attack:14, defense:11, level:1, xp:10,  xpMax:100, image:null, favorite:false, obtainedDate: new Date().toISOString() },
-      { id:'demo-6', name:'Ember Knight',    rarity:'rare',      universe:'Nova Corps',   attack:25, defense:19, level:4, xp:90,  xpMax:120, image:null, favorite:false, obtainedDate: new Date().toISOString() },
-      { id:'demo-7', name:'Void Specter',    rarity:'epic',      universe:'Void Realm',   attack:29, defense:23, level:5, xp:50,  xpMax:150, image:null, favorite:false, obtainedDate: new Date().toISOString() },
-      { id:'demo-8', name:'Crystal Guard',   rarity:'uncommon',  universe:'Steel Citadel',attack:16, defense:20, level:2, xp:45,  xpMax:100, image:null, favorite:false, obtainedDate: new Date().toISOString() },
-    ];
-    AppState.inventory = _demo;
-  }
 
   console.log('[MVCC] App initialized. Wire API endpoints in the API Integration Stubs section.');
   console.log('[MVCC] AppState exposed globally for debugging.');
@@ -7481,7 +7708,6 @@ function renderAuctionList() {
         <div class="empty-state-icon">🏛️</div>
         <div class="empty-state-title">No Listings Found</div>
         <div class="empty-state-body">Try adjusting your filters, or be the first to list a card!</div>
-        <button class="empty-state-action" onclick="openListCardModal()">＋ List a Card</button>
       </div>`;
     document.getElementById('auction-pagination').innerHTML = '';
     return;
@@ -7948,7 +8174,6 @@ function renderMyListings() {
         <div class="empty-state-icon">📋</div>
         <div class="empty-state-title">No Active Listings</div>
         <div class="empty-state-body">List a card from your collection to start earning coins!</div>
-        <button class="empty-state-action" onclick="openListCardModal()">＋ List a Card</button>
       </div>`;
     return;
   }
